@@ -16,5 +16,4 @@ config.py
 
 # 📊 Ignore large or temporary data files
 *.csv
-*.json
 *.log
