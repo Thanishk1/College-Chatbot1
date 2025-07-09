@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot - KITS Warangal</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        .logo {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 80px;  /* Adjust size */
+            height: auto;
+        }
+        .chat-container {
+            width: 40%;
+            margin: 50px auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            position: relative;
+        }
+        .chat-box {
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .message {
+            padding: 10px;
+            border-radius: 10px;
+            margin: 5px 0;
+            max-width: 75%;
+            word-wrap: break-word;
+        }
+        .user-message {
+            background: #007bff;
+            color: white;
+            text-align: right;
+            margin-left: auto;
+        }
+        .bot-message {
+            background: #e5e5e5;
+            color: black;
+            text-align: left;
+            margin-right: auto;
+        }
+        .input-container {
+            display: flex;
+            padding: 10px;
+        }
+        input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 15px;
+            border: none;
+            background: #007bff;
+            color: white;
+            border-radius: 5px;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .typing-indicator {
+            font-style: italic;
+            color: gray;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <img src="{{ url_for('static', filename='KITSW_logo.jpeg') }}" alt="KITS Warangal Logo" class="logo">
+
+    <div class="chat-container">
+        <h2>KITS Warangal Chatbot</h2>
+        <div class="chat-box" id="chatBox"></div>
+        <p class="typing-indicator" id="typingIndicator">Bot is typing...</p>
+        <div class="input-container">
+            <input type="text" id="query" placeholder="Ask something..." onkeypress="handleKeyPress(event)">
+            <button onclick="sendQuery()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        function appendMessage(text, className) {
+            const chatBox = document.getElementById("chatBox");
+            const messageDiv = document.createElement("div");
+            messageDiv.classList.add("message", className);
+            messageDiv.innerText = text;
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === "Enter") {
+                sendQuery();
+            }
+        }
+
+        function sendQuery() {
+            const queryInput = document.getElementById("query");
+            const query = queryInput.value.trim();
+            if (!query) return;
+
+            appendMessage(query, "user-message");
+            queryInput.value = "";
+            document.getElementById("typingIndicator").style.display = "block";
+
+            fetch("/query", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ query: query })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("typingIndicator").style.display = "none";
+                if (data.answer) {
+                    appendMessage(data.answer, "bot-message");
+                } else {
+                    appendMessage("I couldn't find an exact match. Here are some suggestions:", "bot-message");
+                    data.similar_questions.forEach(q => appendMessage(q, "bot-message"));
+                }
+            })
+            .catch(error => {
+                document.getElementById("typingIndicator").style.display = "none";
+                appendMessage("Error: Unable to fetch response.", "bot-message");
+                console.error("Error:", error);
+            });
+        }
+    </script>
+
+</body>
+</html>

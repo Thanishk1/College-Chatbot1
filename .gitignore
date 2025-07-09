@@ -1,0 +1,20 @@
+# 🛑 Ignore virtual environments
+chatbot_env/
+
+# 🧹 Ignore Python cache and compiled files
+__pycache__/
+*.pyc
+*.pyo
+
+# 📂 Ignore system and OS-specific files
+.DS_Store
+Thumbs.db
+
+# 🔐 Ignore environment/config files
+.env
+config.py
+
+# 📊 Ignore large or temporary data files
+*.csv
+*.json
+*.log
